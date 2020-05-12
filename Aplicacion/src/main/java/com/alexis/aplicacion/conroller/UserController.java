@@ -1,13 +1,18 @@
 package com.alexis.aplicacion.conroller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.alexis.aplicacion.entity.Uuser;
 import com.alexis.aplicacion.repository.RoleRepository;
-import com.alexis.aplicacion.repository.UserRepository;
 import com.alexis.aplicacion.service.UserService;
 
 @Controller
@@ -18,16 +23,39 @@ public class UserController {
 	@Autowired
 	RoleRepository roleRepository;
 	
-	@RequestMapping("/")
+	@GetMapping("/")
 	public String index() {
 		return "index";
 	}
-	@RequestMapping("/userForm")
+	@GetMapping("/userForm")
 	public String userForm(Model model) {
 		model.addAttribute("userForm", new Uuser());
 		model.addAttribute("userList", userService.getAllUusers());
 		model.addAttribute("roles", roleRepository.findAll());
-		model.addAttribute("listTap", "active");
+		model.addAttribute("listTab", "active");
 		return"user-form/user-view";
+	}
+	@PostMapping("/userForm")    
+	public String createUser(@Valid @ModelAttribute("userForm")Uuser uuser, BindingResult result, ModelMap model ) {
+		if (result.hasErrors()) {
+			model.addAttribute("userForm", uuser);
+			model.addAttribute("formTab", "active");
+		}else {
+			try {
+				userService.createUser(uuser);
+				model.addAttribute("userForm", new Uuser());
+				model.addAttribute("listTab", "active");
+			} catch (Exception e) {
+				model.addAttribute("formErrorMessage ", e.getMessage());
+				model.addAttribute("userForm", uuser);
+				model.addAttribute("formTab", "active");	
+				model.addAttribute("userList", userService.getAllUusers());
+				model.addAttribute("roles", roleRepository.findAll());
+				
+			}
+		}
+		model.addAttribute("userList", userService.getAllUusers());
+		model.addAttribute("roles", roleRepository.findAll());
+		return "user-form/user-view";
 	}
 }

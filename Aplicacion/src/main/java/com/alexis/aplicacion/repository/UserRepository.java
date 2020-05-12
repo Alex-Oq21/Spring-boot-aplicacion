@@ -1,5 +1,6 @@
 package com.alexis.aplicacion.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
@@ -10,5 +11,5 @@ import com.alexis.aplicacion.entity.Uuser;
 @Repository
 public interface UserRepository extends CrudRepository<Uuser, Long> {
 	
-	//public Set<Uuser> findbyName(String username);
+	public Optional<Uuser> findByUsername(String username);
 }
