@@ -50,8 +50,8 @@ public class Uuser implements Serializable {
 	
 	@Size(min=1)
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "User_roles",
-			joinColumns =@JoinColumn(name="user_id"),
+	@JoinTable(name = "Uuser_roles",
+			joinColumns =@JoinColumn(name="uuser_id"),
 			inverseJoinColumns = @JoinColumn(name="role_id"))
 	private Set<Role> roles;
 

@@ -31,7 +31,7 @@ public  class UserServiceImpl implements UserService {
 		return true;
 	}
 	@Override
-	public Uuser createUser(Uuser uuser)throws Exception {
+	public Uuser createUuser(Uuser uuser)throws Exception {
 			
 		if (CheckusernameAvaliable(uuser) && CheckpasswordValid(uuser))  {
 			uuser = repository.save(uuser);
@@ -42,7 +42,7 @@ public  class UserServiceImpl implements UserService {
 	@Override
 	public Uuser getUuserById(Long id) throws Exception {
 		
-		return repository.findById(id).orElseThrow(() -> new Exception("El usuario que intenta editar no existe"));
+		return repository.findById(id).orElseThrow(() -> new Exception("El usuario  no existe"));
 	}
 	@Override
 	public Uuser updateUuser(Uuser fromUuser) throws Exception {
@@ -57,5 +57,11 @@ public  class UserServiceImpl implements UserService {
 		to.setLastName(from.getLastName());
 		to.setEmail(from.getEmail());
 		to.setRoles(from.getRoles());
+	}
+	@Override
+	public void deleteUuser(Long id) throws Exception {
+		Uuser uuser= getUuserById(id);
+		repository.delete(uuser);
+		
 	}
 }
