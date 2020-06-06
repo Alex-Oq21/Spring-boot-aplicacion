@@ -3,6 +3,8 @@ package com.alexis.aplicacion.service;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.alexis.aplicacion.dto.ChangePasswordForm;
 import com.alexis.aplicacion.entity.Uuser;
 import com.alexis.aplicacion.repository.UserRepository;
 @Service
@@ -63,5 +65,20 @@ public  class UserServiceImpl implements UserService {
 		Uuser uuser= getUuserById(id);
 		repository.delete(uuser);
 		
+	}
+	@Override
+	public Uuser changePassword(ChangePasswordForm form) throws Exception {
+		Uuser uuser = getUuserById(form.getId());
+		if ( ! uuser.getPassword().equals(form.getCurrentPassword())) {
+			throw new Exception("Contraseña Actual Invalido");
+		}
+		if (uuser.getPassword().equals(form.getNewPassword())) {
+			throw new Exception("La nueva contraseña debe ser diferente a la actual");
+		}
+		if (! form.getNewPassword().equals(form.getConfirmPassword())) {
+			throw new Exception("Las contraseñas no coinciden");
+		}
+			uuser.setPassword(form.getNewPassword());
+		return repository.save(uuser);
 	}
 }
