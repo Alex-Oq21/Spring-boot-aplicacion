@@ -2,6 +2,10 @@ package com.alexis.aplicacion.service;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.alexis.aplicacion.dto.ChangePasswordForm;
@@ -11,7 +15,7 @@ import com.alexis.aplicacion.repository.UserRepository;
 public  class UserServiceImpl implements UserService {
 	@Autowired
 	UserRepository repository;
-	
+	BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Override
 	public Iterable<Uuser> getAllUusers() { 
 		return repository.findAll();
@@ -36,6 +40,8 @@ public  class UserServiceImpl implements UserService {
 	public Uuser createUuser(Uuser uuser)throws Exception {
 			
 		if (CheckusernameAvaliable(uuser) && CheckpasswordValid(uuser))  {
+			String encodePassword = bCryptPasswordEncoder.encode(uuser.getPassword());
+			uuser.setPassword(encodePassword);
 			uuser = repository.save(uuser);
 			
 		}
@@ -61,6 +67,7 @@ public  class UserServiceImpl implements UserService {
 		to.setRoles(from.getRoles());
 	}
 	@Override
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	public void deleteUuser(Long id) throws Exception {
 		Uuser uuser= getUuserById(id);
 		repository.delete(uuser);
@@ -69,8 +76,8 @@ public  class UserServiceImpl implements UserService {
 	@Override
 	public Uuser changePassword(ChangePasswordForm form) throws Exception {
 		Uuser uuser = getUuserById(form.getId());
-		if ( ! uuser.getPassword().equals(form.getCurrentPassword())) {
-			throw new Exception("Contraseña Actual Invalido");
+		if ( !isLoggedUserADMIN() &&! uuser.getPassword().equals(form.getCurrentPassword())) {
+			throw new Exception("Contraseña Actual Invalida");
 		}
 		if (uuser.getPassword().equals(form.getNewPassword())) {
 			throw new Exception("La nueva contraseña debe ser diferente a la actual");
@@ -78,7 +85,25 @@ public  class UserServiceImpl implements UserService {
 		if (! form.getNewPassword().equals(form.getConfirmPassword())) {
 			throw new Exception("Las contraseñas no coinciden");
 		}
-			uuser.setPassword(form.getNewPassword());
-		return repository.save(uuser);
+			String encodePassword = bCryptPasswordEncoder.encode(form.getNewPassword());
+			uuser.setPassword(encodePassword);
+			return repository.save(uuser);
 	}
+	public boolean isLoggedUserADMIN(){
+		 return loggedUserHasRole("ROLE_ADMIN");
+		}
+
+		public boolean loggedUserHasRole(String role) {
+		 Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		 UserDetails loggedUser = null;
+		 Object roles = null; 
+		 if (principal instanceof UserDetails) {
+		  loggedUser = (UserDetails) principal;
+		 
+		  roles = loggedUser.getAuthorities().stream()
+		    .filter(x -> role.equals(x.getAuthority() ))      
+		    .findFirst().orElse(null); //loggedUser = null;
+		 }
+		 return roles != null ?true :false;
+}
 }
