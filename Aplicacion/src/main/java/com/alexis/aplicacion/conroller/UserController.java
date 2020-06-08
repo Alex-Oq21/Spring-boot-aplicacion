@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.alexis.aplicacion.Exception.UsernameOrIdNotfound;
 import com.alexis.aplicacion.dto.ChangePasswordForm;
 import com.alexis.aplicacion.entity.Uuser;
 import com.alexis.aplicacion.repository.RoleRepository;
@@ -114,7 +115,7 @@ public class UserController {
 	public String deleteUser(Model model, @PathVariable(name="id")Long id) {
 		try {
 			userService.deleteUuser(id);
-		}catch(Exception e) {
+		}catch(UsernameOrIdNotfound e) {
 			model.addAttribute("ListErrorMessage", e.getMessage());
 		}
 		return userForm(model);

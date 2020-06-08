@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.alexis.aplicacion.Exception.UsernameOrIdNotfound;
 import com.alexis.aplicacion.dto.ChangePasswordForm;
 import com.alexis.aplicacion.entity.Uuser;
 import com.alexis.aplicacion.repository.UserRepository;
@@ -48,9 +49,9 @@ public  class UserServiceImpl implements UserService {
 		return uuser;
 	}
 	@Override
-	public Uuser getUuserById(Long id) throws Exception {
+	public Uuser getUuserById(Long id) throws UsernameOrIdNotfound {
 		
-		return repository.findById(id).orElseThrow(() -> new Exception("El usuario  no existe"));
+		return repository.findById(id).orElseThrow(() -> new UsernameOrIdNotfound("El usuario  no existe"));
 	}
 	@Override
 	public Uuser updateUuser(Uuser fromUuser) throws Exception {
@@ -68,7 +69,7 @@ public  class UserServiceImpl implements UserService {
 	}
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	public void deleteUuser(Long id) throws Exception {
+	public void deleteUuser(Long id) throws UsernameOrIdNotfound {
 		Uuser uuser= getUuserById(id);
 		repository.delete(uuser);
 		
