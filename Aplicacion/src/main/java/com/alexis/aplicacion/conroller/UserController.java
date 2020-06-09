@@ -1,5 +1,7 @@
 package com.alexis.aplicacion.conroller;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.*;
@@ -19,9 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alexis.aplicacion.Exception.UsernameOrIdNotfound;
 import com.alexis.aplicacion.dto.ChangePasswordForm;
+import com.alexis.aplicacion.entity.Role;
 import com.alexis.aplicacion.entity.Uuser;
 import com.alexis.aplicacion.repository.RoleRepository;
 import com.alexis.aplicacion.service.UserService;
+
+
 
 @Controller
 public class UserController {
@@ -33,6 +38,38 @@ public class UserController {
 	
 	@GetMapping({"/","/login"})
 	public String index() {
+		return "index";
+	}
+	@GetMapping("/signup")
+	public String signup(Model model) {
+		Role  userRole = roleRepository.findByName("uuser");
+		List<Role> roles = Arrays.asList(userRole);
+		model.addAttribute("userForm", new Uuser());
+		model.addAttribute("roles", roleRepository.findAll());
+		model.addAttribute("signup", true);
+		return "user-form/user-signup";
+	}
+	@PostMapping("/signup")
+	public String postSignup(@Valid @ModelAttribute("userForm")Uuser uuser, BindingResult result, ModelMap model ) {
+		Role  userRole = roleRepository.findByName("uuser");
+		List<Role> roles = Arrays.asList(userRole);
+		model.addAttribute("userForm",  uuser);
+		model.addAttribute("roles", roleRepository.findAll());
+		model.addAttribute("signup", true);
+		if (result.hasErrors()) {
+			return "user-form/user-signup";
+		}else {
+			try {
+				userService.createUuser(uuser);
+				
+				
+			} catch (Exception e) {
+				model.addAttribute("formErrorMessage ", e.getMessage());
+				return "user-form/user-signup";
+				
+			}
+		}
+		
 		return "index";
 	}
 	@GetMapping("/userForm")
